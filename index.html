@@ -200,11 +200,16 @@
             font-size: 0.85rem; color: #00d26a; display: none;
         }
         .translation-notice.visible { display: block; }
+        .model-note {
+            font-size: 0.78rem; color: #888; margin-top: 6px; line-height: 1.4;
+        }
+        .model-note strong { color: #ffc107; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
         ::-webkit-scrollbar-thumb { background: rgba(233, 69, 96, 0.3); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(233, 69, 96, 0.5); }
     </style>
+<base target="_blank">
 </head>
 <body>
     <div class="container">
@@ -285,7 +290,7 @@
                                     <input type="radio" name="ai" value="openrouter" checked id="openrouter">
                                     <label for="openrouter">
                                         <span class="ai-name">OpenRouter <span class="mode-badge free">FREE</span></span>
-                                        <span class="ai-desc">Qwen, DeepSeek, Llama, Gemini — no credit card</span>
+                                        <span class="ai-desc">Llama, Qwen, Gemma, Nemotron — no credit card</span>
                                     </label>
                                 </div>
                                 <div class="ai-option" onclick="selectAI('mzansi-future')">
@@ -298,15 +303,28 @@
                             </div>
                         </div>
                         <div id="modelSelector">
-                            <h3>🎯 Free Model</h3>
+                            <h3>🎯 Free Model (June 2026)</h3>
                             <select class="model-select" id="openrouterModel">
-                                <option value="qwen/qwen3.6-plus:free">Qwen 3.6 Plus (free) 🇨🇳</option>
-                                <option value="deepseek/deepseek-chat:free">DeepSeek Chat (free)</option>
-                                <option value="01-ai/yi-large:free">Yi Large (free) 🇨🇳</option>
-                                <option value="thudm/glm-4:free">GLM-4 (free) 🇨🇳</option>
-                                <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (free)</option>
-                                <option value="google/gemini-2.5-flash:free">Gemini 2.5 Flash (free)</option>
+                                <option value="meta-llama/llama-3.3-70b-instruct:free">🦙 Llama 3.3 70B Instruct (free) — Best Overall</option>
+                                <option value="qwen/qwen3-coder:free">💻 Qwen3 Coder 480B A35B (free) — Best for Code</option>
+                                <option value="google/gemma-4-31b-it:free">💎 Gemma 4 31B (free) — Vision + Tools</option>
+                                <option value="google/gemma-4-26b-a4b-it:free">💎 Gemma 4 26B A4B (free) — Fast & Efficient</option>
+                                <option value="nvidia/nemotron-3-super-120b-a12b:free">🧠 Nemotron 3 Super 120B (free) — Huge Context</option>
+                                <option value="nvidia/nemotron-3-ultra-550b-a55b:free">🧠 Nemotron 3 Ultra 550B (free) — Most Powerful</option>
+                                <option value="nvidia/nemotron-3-nano-30b-a3b:free">⚡ Nemotron 3 Nano 30B (free) — Balanced</option>
+                                <option value="nvidia/nemotron-nano-12b-v2-vl:free">👁️ Nemotron Nano 12B v2 VL (free) — Vision</option>
+                                <option value="nousresearch/hermes-3-llama-3.1-405b:free">🔥 Hermes 3 405B (free) — Uncensored</option>
+                                <option value="cohere/north-mini-code:free">📝 North Mini Code (free) — Lightweight</option>
+                                <option value="liquid/lfm-2.5-1.2b-instruct:free">🌊 LFM 2.5 1.2B (free) — Ultra Fast</option>
+                                <option value="liquid/lfm-2.5-1.2b-thinking:free">🌊 LFM 2.5 1.2B Thinking (free) — Reasoning</option>
+                                <option value="openai/gpt-oss-120b:free">🤖 GPT-OSS 120B (free) — OpenAI Open Weight</option>
+                                <option value="openai/gpt-oss-20b:free">🤖 GPT-OSS 20B (free) — OpenAI Lightweight</option>
+                                <option value="moonshotai/kimi-k2:free">🌙 Kimi K2 (free) — 1M Context</option>
+                                <option value="deepseek/deepseek-r1:free">🔍 DeepSeek R1 (free) — Reasoning</option>
                             </select>
+                            <div class="model-note">
+                                <strong>💡 Tip:</strong> If a model gives 404, just switch to another. Free models rotate often. <strong>Llama 3.3 70B</strong> is the most stable.
+                            </div>
                         </div>
                         <div>
                             <h3>🔑 API Key</h3>
@@ -318,7 +336,7 @@
                             <strong>✅ How it works today:</strong><br>
                             1. Write in any SA language<br>
                             2. Google Translate converts to English<br>
-                            3. OpenRouter AI (Qwen/DeepSeek/etc.) tutors you<br>
+                            3. OpenRouter AI tutors you<br>
                             4. Response translated back to your language<br><br>
                             <strong>🎯 Future:</strong> Replace with your fine-tuned MzansiLM
                         </div>
@@ -356,7 +374,6 @@
 
     <script>
         // Google Translate API (free tier: 500k chars/month)
-        // For production, use your own API key from Google Cloud
         const GOOGLE_TRANSLATE_API = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl={source}&tl={target}&dt=t&q={text}';
 
         let files = { question: null, memo: null };
@@ -372,6 +389,15 @@
             st: 'Sesotho', tn: 'Setswana', nso: 'Sepedi', ts: 'Xitsonga',
             ss: 'siSwati', ve: 'Tshivenda', nr: 'isiNdebele'
         };
+
+        // Free models list for fallback suggestions
+        const FREE_MODELS = [
+            { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B' },
+            { id: 'qwen/qwen3-coder:free', name: 'Qwen3 Coder' },
+            { id: 'google/gemma-4-31b-it:free', name: 'Gemma 4 31B' },
+            { id: 'nvidia/nemotron-3-super-120b-a12b:free', name: 'Nemotron 3 Super' },
+            { id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1' }
+        ];
 
         ['questionZone', 'memoZone'].forEach(id => {
             const zone = document.getElementById(id);
@@ -532,7 +558,27 @@
 
             } catch (err) {
                 document.getElementById('typingIndicator').classList.remove('visible');
-                addMessage('ai', '❌ Error: ' + err.message + '\n\n💡 Check your API key and try again.', getAIName());
+
+                // Smart error handling with model suggestions
+                let errorMsg = '❌ Error: ' + err.message;
+
+                if (err.message.includes('404') || err.message.includes('deprecated')) {
+                    const currentModel = document.getElementById('openrouterModel').value;
+                    const modelName = currentModel.split('/').pop().replace(':free', '');
+                    errorMsg = `❌ **${modelName}** is no longer available (deprecated).\n\n`;
+                    errorMsg += `💡 **Quick Fix:** Open the **Free Model** dropdown above and pick a different model.\n\n`;
+                    errorMsg += `🦙 **Recommended:** Try **Llama 3.3 70B** or **Gemma 4 31B** — they're the most stable free models right now.\n\n`;
+                    errorMsg += `Free models rotate often. If one stops working, just switch to another!`;
+                } else if (err.message.includes('401') || err.message.includes('Unauthorized')) {
+                    errorMsg = `❌ **Invalid API Key**\n\n`;
+                    errorMsg += `💡 Get your free API key at **openrouter.ai** → Sign Up → API Keys\n`;
+                    errorMsg += `Paste it in the **API Key** box on the left, then click **Test Connection**.`;
+                } else if (err.message.includes('429')) {
+                    errorMsg = `❌ **Rate Limited** — You've hit the free tier limit (20 req/min, 200/day).\n\n`;
+                    errorMsg += `💡 Wait a minute and try again, or switch to a different free model.`;
+                }
+
+                addMessage('ai', errorMsg, getAIName());
             }
 
             document.getElementById('sendBtn').disabled = false;
@@ -542,9 +588,24 @@
             const messagesDiv = document.getElementById('messages');
             const div = document.createElement('div'); 
             div.className = 'message ' + role;
-            div.innerHTML = `<div class="meta">${meta}</div>${escapeHtml(text)}`;
+            // Use innerHTML for AI messages to support formatting, textContent for user
+            if (role === 'ai') {
+                div.innerHTML = `<div class="meta">${escapeHtml(meta)}</div>${formatMessage(text)}`;
+            } else {
+                div.innerHTML = `<div class="meta">${escapeHtml(meta)}</div>${escapeHtml(text)}`;
+            }
             messagesDiv.appendChild(div); 
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function formatMessage(text) {
+            // Convert markdown-like formatting to HTML
+            let html = escapeHtml(text);
+            // Bold
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            // Line breaks
+            html = html.replace(/\n/g, '<br>');
+            return html;
         }
 
         function escapeHtml(text) { 
@@ -613,8 +674,8 @@ Context from files:\n${context}`;
             });
 
             if (!response.ok) {
-                const err = await response.text();
-                throw new Error(`${response.status}: ${err}`);
+                const errText = await response.text();
+                throw new Error(`${response.status}: ${errText}`);
             }
 
             const data = await response.json();
